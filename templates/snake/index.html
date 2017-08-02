@@ -1,0 +1,18 @@
+{%extends 'base_site.html'%} {%block content%}
+<div class="jumbotron">
+  <div class="row">
+    <!-- <img src="https://s3.amazonaws.com/sebsbucket/cdn/morning_gun.png" style="width:100%"> -->
+  </div>
+  <div class="row">
+    <form action="/snake/crawl/" method="POST">
+      {% csrf_token %}
+      <div class="form-group">
+        <label for="document_ids">Document Ids</label>
+        <input type="text" class="form-control" id="document_ids" placeholder="single id or space separated list" name='document_ids'>
+      </div>
+      <button type="submit" class="btn btn-lg btn-default">Snake</button>
+    </form>
+  </div>
+
+</div>
+{%endblock%}
