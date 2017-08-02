@@ -65,6 +65,7 @@ class SnakeySnake(object):
         ensure_exists(self.save_path)
         self.doc_links = []
         self.pdf_files = []
+        self.path_to_zip = None
 
     def retrieve_document_links(self, doc_ids):
         self.br.select_form(nr=0)
@@ -86,8 +87,9 @@ class SnakeySnake(object):
     def zip_documents(self):
         shutil.make_archive(self.save_path, 'zip', self.save_path)
         shutil.rmtree(self.save_path)
+        self.path_to_zip = self.save_path + '.zip'
 
-    def retrieve_and_zip_documents(self, doc_ids):
+    def retrieve_and_zip_documents(self, doc_ids, call_back=None):
         self.retrieve_document_links(doc_ids)
         self.download_documents()
         self.zip_documents()
