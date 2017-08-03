@@ -10,6 +10,7 @@ from bs4 import BeautifulSoup
 from tqdm import tqdm
 
 base_url = 'https://searchicris.co.weld.co.us/recorder'
+re_num = re.compile(r'([0-9]+)')
 
 
 def ensure_exists(path):
@@ -38,12 +39,30 @@ def start_browser():
     br.submit()
     return br
 
-re_num = re.compile(r'([0-9]+)')
+
+def recursive_br(br):
+    html = br.response().read()
+    results = parse_html(html)
+
+    for link in br.links():
+        if link.text == 'Next':
+            print 'switching to:', link.url
+            br.follow_link(link)
+            results.extend(recursive_br(br))
+            br.back()
+            break
+
+    return results
 
 
-def parse_table_soup(html):
+def parse_html(html):
     soup = BeautifulSoup(html, 'html.parser')
-    table = soup.find_all('table', {'id': 'searchResultsTable'})[0]
+
+    try:
+        table = soup.find_all('table', {'id': 'searchResultsTable'})[0]
+    except IndexError:
+        return []
+
     trs = table.find_all('tr', {'class': ['even', 'odd']})
     results = []
     for tr in trs:
@@ -66,23 +85,28 @@ class SnakeySnake(object):
         self.doc_links = []
         self.pdf_files = []
         self.path_to_zip = None
+        self.doc_count = 0
+        self.found_docs = []
 
     def retrieve_document_links(self, doc_ids):
         self.br.select_form(nr=0)
         self.br.form['DocumentNumberID'] = ' '.join(doc_ids)
-        req = self.br.submit()
-        html = req.read()
-        self.doc_links.extend(parse_table_soup(html))
+        self.br.submit()
+        self.doc_links.extend(recursive_br(self.br))
 
     def download_documents(self):
         for doc in tqdm(self.doc_links):
             url = base_url + doc['link']
             self.br.open(url)
             for link in self.br.links():
+                if not link.text:
+                    continue
                 if 'view attachment' in link.text.lower():
                     dst = os.path.join(self.save_path, '{}.pdf'.format(doc['doc_id']))
                     self.pdf_files.append(dst)
                     self.br.retrieve(link.absolute_url, dst)
+                    self.doc_count += 1
+                    self.found_docs.append(doc['doc_id'])
 
     def zip_documents(self):
         shutil.make_archive(self.save_path, 'zip', self.save_path)
