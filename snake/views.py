@@ -34,8 +34,8 @@ def crawl(request):
     response['Content-Disposition'] = 'attachment; filename=' + file_name
 
     missing = [x for x in doc_ids if x not in snake.found_docs]
-    messages.info(request, 'downloaded {}/{} files'.format(snake.doc_count, len(doc_ids)))
-    messages.info(request, 'could not find records for {}'.format(', '.join(missing)))
+    messages.info(request, 'downloaded {0}/{1} files'.format(snake.doc_count, len(doc_ids)))
+    messages.info(request, 'could not find records for {0}'.format(', '.join(missing)))
 
     return response
 
