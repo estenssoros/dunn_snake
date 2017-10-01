@@ -75,8 +75,12 @@ WSGI_APPLICATION = 'dunn_snake.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'dunn_snake',
+        'USER': 'jdunn',
+        'PASSWORD': 'seb132435',
+        'HOST': '52.15.123.63',
+        'PORT': '3306'
     }
 }
 

@@ -94,8 +94,8 @@ class SnakeySnake(object):
         self.br.submit()
         self.doc_links.extend(recursive_br(self.br))
 
-    def download_documents(self):
-        for doc in tqdm(self.doc_links):
+    def download_documents(self, doc_links):
+        for doc in tqdm(doc_links):
             url = base_url + doc['link']
             self.br.open(url)
             for link in self.br.links():
@@ -115,7 +115,9 @@ class SnakeySnake(object):
 
     def retrieve_and_zip_documents(self, doc_ids, call_back=None):
         self.retrieve_document_links(doc_ids)
-        self.download_documents()
+        while len(self.found_docs) != len(self.doc_links):
+            to_download = [x for x in self.doc_links if x['doc_id'] not in self.found_docs]
+            self.download_documents(to_download)
         self.zip_documents()
         self.kill()
 
